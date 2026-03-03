@@ -38,9 +38,9 @@ static void led_blink(int count)
 static void led_blink(int count)
 {
     for(int i=0;i<count;i++) {
-        gpio_set_level(CONFIG_LED_PIN, 1);
-        vTaskDelay(pdMS_TO_TICKS(150));
         gpio_set_level(CONFIG_LED_PIN, 0);
+        vTaskDelay(pdMS_TO_TICKS(150));
+        gpio_set_level(CONFIG_LED_PIN, 1);
         vTaskDelay(pdMS_TO_TICKS(150));
     }
 }
@@ -52,7 +52,7 @@ void task_tx(void *pvParameters)
 	uint8_t buf[255]; // Maximum Payload size of SX1276/77/78/79 is 255
 	while(1) {
 		TickType_t nowTick = xTaskGetTickCount();
-		int send_len = sprintf((char *)buf,"Hello World!! %"PRIu32, nowTick);
+		int send_len = sprintf((char *)buf,"Hello World!!");
 		lora_send_packet(buf, send_len);
 		ESP_LOGI(pcTaskGetName(NULL), "%d byte packet sent...", send_len);
 		int lost = lora_packet_lost();
@@ -100,6 +100,14 @@ void app_main()
 			vTaskDelay(1);
 		}
 	}
+
+#if CONFIG_RECEIVER
+    // Initialize LED GPIO
+    
+    // LED setup
+    gpio_reset_pin(CONFIG_LED_PIN);
+    gpio_set_direction(CONFIG_LED_PIN, GPIO_MODE_OUTPUT);
+#endif
 
 #if CONFIG_433MHZ
 	ESP_LOGI(pcTaskGetName(NULL), "Frequency is 433MHz");
